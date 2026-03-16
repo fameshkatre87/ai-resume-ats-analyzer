@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>ATS Resume Builder</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+<style>
+
+body{
+background:#f4f6f9;
+font-family:Segoe UI;
+}
+
+.builder-card{
+border-radius:14px;
+}
+
+.form-control{
+border-radius:10px;
+padding:10px;
+border:1px solid #dcdcdc;
+}
+
+.section-title{
+font-weight:600;
+margin-top:25px;
+margin-bottom:10px;
+color:#2c3e50;
+}
+
+.add-btn{
+margin-bottom:15px;
+}
+
+.remove-btn{
+margin-left:10px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container mt-5 mb-5">
+
+<h2 class="text-center mb-4">Create ATS Friendly Resume</h2>
+
+<div class="card shadow builder-card p-4">
+
+<form method="POST" id="resumeForm">
+
+{% csrf_token %}
+
+<div class="card p-3 mb-3 shadow-sm">
+
+<h5>👤 Personal Information</h5>
+
+<div class="row">
+
+<div class="col-md-6 mb-3">
+<label>Full Name</label>
+{{form.name}}
+</div>
+
+<div class="col-md-6 mb-3">
+<label>Email</label>
+{{form.email}}
+</div>
+
+<div class="col-md-6 mb-3">
+<label>Phone</label>
+{{form.phone}}
+</div>
+
+<div class="col-md-6 mb-3">
+<label>GitHub</label>
+{{form.github}}
+</div>
+
+<div class="col-md-6 mb-3">
+<label>LinkedIn</label>
+{{form.linkedin}}
+</div>
+
+</div>
+
+</div>
+
+<textarea name="objective" class="form-control mb-3" rows="3" placeholder="Career Objective"></textarea>
+
+<div id="resume-sections">
+
+<h5 class="section-title">Education</h5>
+
+<div id="education-section">
+
+<div class="row">
+
+<div class="col-md-5 mb-3">
+<input type="text" name="college_name[]" class="form-control" placeholder="College">
+</div>
+
+<div class="col-md-3 mb-3">
+<input type="text" name="degree[]" class="form-control" placeholder="Degree">
+</div>
+
+<div class="col-md-2 mb-3">
+<input type="text" name="year[]" class="form-control" placeholder="Year">
+</div>
+
+<div class="col-md-2 mb-3">
+<input type="text" name="percentage[]" class="form-control" placeholder="CGPA">
+</div>
+
+</div>
+
+</div>
+
+<button type="button" class="btn btn-outline-primary add-btn" onclick="addEducation()">+ Add Education</button>
+
+<h5 class="section-title">Skills</h5>
+
+<div id="skills-section">
+<input type="text" name="skills[]" class="form-control mb-2" placeholder="Skill">
+</div>
+
+<button type="button" class="btn btn-outline-primary add-btn" onclick="addSkill()">+ Add Skill</button>
+
+<h5 class="section-title">Experience</h5>
+
+<div id="experience-section">
+
+<div class="experience-item">
+
+<input type="text" name="company[]" class="form-control mb-2" placeholder="Company Name">
+
+<input type="text" name="role[]" class="form-control mb-2" placeholder="Role">
+
+<input type="text" name="duration[]" class="form-control mb-2" placeholder="Duration">
+
+<textarea name="experience_detail[]" class="form-control mb-3"
+placeholder="Work Description"></textarea>
+
+</div>
+
+</div>
+
+<button type="button"
+class="btn btn-outline-primary add-btn"
+onclick="addExperience()">
++ Add Experience
+</button>
+
+<h5 class="section-title">Projects</h5>
+
+<div id="project-section">
+
+<div class="project-item">
+
+<input type="text" name="project_name[]" class="form-control mb-2" placeholder="Project Name">
+
+<textarea name="project_detail[]" class="form-control mb-2" rows="2" placeholder="Project Description"></textarea>
+
+<input type="text" name="project_link[]" class="form-control mb-3" placeholder="Project Link (Optional)">
+
+</div>
+
+</div>
+
+<button type="button" class="btn btn-outline-primary add-btn" onclick="addProject()">+ Add Project</button>
+
+<h5 class="section-title">Certificates</h5>
+
+<div id="certificate-section">
+<input type="text" name="certificates[]" class="form-control mb-2" placeholder="Certificate">
+</div>
+
+<button type="button" class="btn btn-outline-primary add-btn" onclick="addCertificate()">+ Add Certificate</button>
+
+<h5 class="section-title">Achievements</h5>
+
+<div id="achievement-section">
+<input type="text" name="achievements[]" class="form-control mb-2" placeholder="Achievement">
+</div>
+
+<button type="button" class="btn btn-outline-primary add-btn" onclick="addAchievement()">+ Add Achievement</button>
+
+</div>
+
+<h5 class="section-title">Add Section</h5>
+
+<select class="form-control mb-3" id="sectionSelect" onchange="addSection()">
+<option value="">Select Section</option>
+<option value="languages">Languages</option>
+<option value="interests">Interests</option>
+<option value="links">Portfolio Links</option>
+</select>
+
+<!-- Languages -->
+
+<div id="language-section" style="display:none">
+
+<h5 class="section-title">Languages</h5>
+
+<div id="languages-container">
+<input type="text" name="languages[]" class="form-control mb-2" placeholder="Language">
+</div>
+
+<button type="button" class="btn btn-outline-primary add-btn" onclick="addLanguage()">
++ Add Language
+</button>
+
+</div>
+
+
+<!-- Interests -->
+
+<div id="interest-section" style="display:none">
+
+<h5 class="section-title">Interests</h5>
+
+<div id="interests-container">
+<input type="text" name="interests[]" class="form-control mb-2" placeholder="Interest">
+</div>
+
+<button type="button" class="btn btn-outline-primary add-btn" onclick="addInterest()">
++ Add Interest
+</button>
+
+</div>
+
+
+<!-- Links -->
+
+<div id="link-section" style="display:none">
+
+<h5 class="section-title">Portfolio Links</h5>
+
+<div id="links-container">
+<input type="text" name="links[]" class="form-control mb-2" placeholder="Portfolio Link">
+</div>
+
+<button type="button" class="btn btn-outline-primary add-btn" onclick="addLink()">
++ Add Link
+</button>
+
+</div>
+
+<h5 class="section-title">Template</h5>
+
+{{form.template}}
+
+<div class="row mt-3">
+
+<div class="col-md-4">
+<button type="submit" name="preview" formtarget="_blank" class="btn btn-primary w-100">
+Preview
+</button>
+</div>
+
+<div class="col-md-4">
+<button type="submit" name="download" class="btn btn-success w-100">Download</button>
+</div>
+
+<div class="col-md-4">
+<button type="button" class="btn btn-danger w-100" onclick="resetForm()">Reset</button>
+</div>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+<script>
+
+new Sortable(document.getElementById("resume-sections"),{
+animation:150
+});
+
+function addSkill(){
+document.getElementById("skills-section").insertAdjacentHTML("beforeend",
+`<div class="d-flex mb-2">
+<input type="text" name="skills[]" class="form-control">
+<button type="button" class="btn btn-danger remove-btn" onclick="this.parentElement.remove()">X</button>
+</div>`);
+}
+
+function addExperience(){
+
+document.getElementById("experience-section").insertAdjacentHTML("beforeend",`
+
+<div class="experience-item">
+
+<input type="text" name="company[]" class="form-control mb-2" placeholder="Company Name">
+
+<input type="text" name="role[]" class="form-control mb-2" placeholder="Role">
+
+<input type="text" name="duration[]" class="form-control mb-2" placeholder="Duration">
+
+<textarea name="experience_detail[]" class="form-control mb-3" rows="2" placeholder="Work Description"></textarea>
+
+<button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">Remove</button>
+
+</div>
+
+`);
+
+}
+
+function addProject(){
+document.getElementById("project-section").insertAdjacentHTML("beforeend",
+`<div class="project-item">
+<input type="text" name="project_name[]" class="form-control mb-2" placeholder="Project Name">
+<textarea name="project_detail[]" class="form-control mb-2" rows="2" placeholder="Project Description"></textarea>
+<input type="text" name="project_link[]" class="form-control mb-2" placeholder="Project Link (Optional)">
+<button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">Remove</button>
+</div>`);
+}
+
+function addEducation(){
+document.getElementById("education-section").insertAdjacentHTML("beforeend",
+`<div class="row">
+<div class="col-md-5 mb-3"><input type="text" name="college_name[]" class="form-control"></div>
+<div class="col-md-3 mb-3"><input type="text" name="degree[]" class="form-control"></div>
+<div class="col-md-2 mb-3"><input type="text" name="year[]" class="form-control"></div>
+<div class="col-md-2 mb-3"><input type="text" name="percentage[]" class="form-control"></div>
+</div>`);
+}
+
+function addCertificate(){
+document.getElementById("certificate-section").insertAdjacentHTML("beforeend",
+`<div class="d-flex mb-2">
+<input type="text" name="certificates[]" class="form-control">
+<button type="button" class="btn btn-danger remove-btn" onclick="this.parentElement.remove()">X</button>
+</div>`);
+}
+
+function addAchievement(){
+document.getElementById("achievement-section").insertAdjacentHTML("beforeend",
+`<div class="d-flex mb-2">
+<input type="text" name="achievements[]" class="form-control">
+<button type="button" class="btn btn-danger remove-btn" onclick="this.parentElement.remove()">X</button>
+</div>`);
+}
+
+function showLanguages(){
+document.getElementById("language-section").style.display="block";
+}
+
+function showInterests(){
+document.getElementById("interest-section").style.display="block";
+}
+
+function resetForm(){
+
+    // clear normal inputs
+    const form = document.getElementById("resumeForm");
+    form.reset();
+
+    // manually clear Django rendered fields
+    document.querySelectorAll("#resumeForm input").forEach(el => {
+        el.value = "";
+    });
+
+    document.querySelectorAll("#resumeForm textarea").forEach(el => {
+        el.value = "";
+    });
+
+    document.querySelectorAll("#resumeForm select").forEach(el => {
+        el.selectedIndex = 0;
+    });
+
+    // remove dynamically added sections
+    document.getElementById("skills-section").innerHTML =
+        `<input type="text" name="skills[]" class="form-control mb-2" placeholder="Skill">`;
+
+    document.getElementById("education-section").innerHTML = `
+    <div class="row">
+        <div class="col-md-5 mb-3"><input type="text" name="college_name[]" class="form-control" placeholder="College"></div>
+        <div class="col-md-3 mb-3"><input type="text" name="degree[]" class="form-control" placeholder="Degree"></div>
+        <div class="col-md-2 mb-3"><input type="text" name="year[]" class="form-control" placeholder="Year"></div>
+        <div class="col-md-2 mb-3"><input type="text" name="percentage[]" class="form-control" placeholder="CGPA"></div>
+    </div>`;
+
+    document.getElementById("project-section").innerHTML = `
+    <div class="project-item">
+        <input type="text" name="project_name[]" class="form-control mb-2" placeholder="Project Name">
+        <textarea name="project_detail[]" class="form-control mb-2" rows="2" placeholder="Project Description"></textarea>
+        <input type="text" name="project_link[]" class="form-control mb-3" placeholder="Project Link (Optional)">
+    </div>`;
+
+    document.getElementById("certificate-section").innerHTML =
+        `<input type="text" name="certificates[]" class="form-control mb-2" placeholder="Certificate">`;
+
+    document.getElementById("achievement-section").innerHTML =
+        `<input type="text" name="achievements[]" class="form-control mb-2" placeholder="Achievement">`;
+
+    // finally reload clean page (no POST data)
+    window.location.href = window.location.pathname;
+}
+function addSection(){
+
+let section=document.getElementById("sectionSelect").value;
+
+if(section==="languages"){
+document.getElementById("language-section").style.display="block";
+}
+
+if(section==="interests"){
+document.getElementById("interest-section").style.display="block";
+}
+
+if(section==="links"){
+document.getElementById("link-section").style.display="block";
+}
+
+}
+
+
+
+function addLanguage(){
+
+let container = document.getElementById("languages-container");
+
+container.insertAdjacentHTML("beforeend", `
+<div class="d-flex mb-2">
+<input type="text" name="languages[]" class="form-control">
+<button type="button" class="btn btn-danger remove-btn"
+onclick="this.parentElement.remove()">X</button>
+</div>
+`);
+
+}
+
+
+
+function addInterest(){
+
+let container = document.getElementById("interests-container");
+
+container.insertAdjacentHTML("beforeend", `
+<div class="d-flex mb-2">
+<input type="text" name="interests[]" class="form-control">
+<button type="button" class="btn btn-danger remove-btn"
+onclick="this.parentElement.remove()">X</button>
+</div>
+`);
+
+}
+
+
+
+function addLink(){
+
+let container = document.getElementById("links-container");
+
+container.insertAdjacentHTML("beforeend", `
+<div class="d-flex mb-2">
+<input type="text" name="links[]" class="form-control">
+<button type="button" class="btn btn-danger remove-btn"
+onclick="this.parentElement.remove()">X</button>
+</div>
+`);
+
+}
+</script>
+
+</body>
+</html>

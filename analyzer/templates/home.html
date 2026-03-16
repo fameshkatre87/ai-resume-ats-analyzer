@@ -1,0 +1,436 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>AI Resume ATS Analyzer</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+
+body{
+background:#f4f6f9;
+font-family:Segoe UI;
+}
+
+#drop-area{
+border:2px dashed #0d6efd;
+padding:40px;
+text-align:center;
+cursor:pointer;
+border-radius:10px;
+background:white;
+transition:0.3s;
+}
+
+#drop-area:hover{
+background:#f1f6ff;
+}
+
+.feature-box{
+padding:20px;
+background:white;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.05);
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container mt-4">
+
+<div class="text-end">
+
+<a href="/resume-builder/" class="btn btn-success">
+Create Resume
+</a>
+
+<a href="/" class="btn btn-outline-secondary">
+Clear
+</a>
+
+</div>
+
+</div>
+
+<div class="container mt-4 text-center">
+
+<h1 class="fw-bold">AI Resume ATS Analyzer</h1>
+
+<p class="text-muted">
+Upload your resume and check ATS compatibility instantly
+</p>
+
+</div>
+
+
+<div class="container mt-5">
+
+<div class="row text-center mb-5">
+
+<div class="col-md-4">
+
+<div class="feature-box">
+
+<h5>ATS Score</h5>
+
+<p>Check how well your resume performs in ATS systems</p>
+
+</div>
+
+</div>
+
+<div class="col-md-4">
+
+<div class="feature-box">
+
+<h5>Skill Matching</h5>
+
+<p>Compare your resume skills with job requirements</p>
+
+</div>
+
+</div>
+
+<div class="col-md-4">
+
+<div class="feature-box">
+
+<h5>AI Suggestions</h5>
+
+<p>Improve your resume with smart AI recommendations</p>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="container">
+
+<div class="card shadow p-4">
+
+<form method="POST" enctype="multipart/form-data">
+
+{% csrf_token %}
+
+<div class="mb-3">
+
+<label class="form-label">Upload Resume</label>
+
+<div id="drop-area">
+
+<p class="text-muted">📄 Drag & Drop Resume Here</p>
+
+<p>or</p>
+
+<input type="file" name="resume" id="fileInput" class="form-control">
+
+</div>
+
+</div>
+
+<div class="mb-3">
+
+<label class="form-label">Job Description (Optional)</label>
+
+<textarea name="job_description"
+class="form-control"
+rows="6"
+placeholder="Paste job description here..."></textarea>
+
+</div>
+
+<button type="submit" class="btn btn-primary w-100">
+Analyze Resume
+</button>
+
+</form>
+
+</div>
+
+</div>
+{% if rewrites %}
+
+<div class="card mt-4 shadow p-4">
+
+<h4>AI Resume Rewrite Suggestions</h4>
+
+<ul class="list-group">
+
+{% for r in rewrites %}
+<li class="list-group-item text-primary">{{r}}</li>
+{% endfor %}
+
+</ul>
+
+</div>
+
+{% endif %}
+
+{% if match_percent %}
+
+<div class="card mt-4 shadow p-4">
+
+<h4>Job Match Percentage</h4>
+
+<div class="progress" style="height:25px">
+
+<div class="progress-bar bg-info"
+style="width:{{match_percent}}%">
+
+{{match_percent}}%
+
+</div>
+
+</div>
+
+</div>
+
+{% endif %}
+
+{% if strength %}
+
+<div class="card mt-4 shadow p-4">
+
+<h4>Resume Strength</h4>
+
+<h5 class="text-primary">{{strength}}</h5>
+
+</div>
+
+{% endif %}
+
+
+{% if score %}
+
+<div class="container mt-4">
+
+<div class="card shadow p-4">
+
+<h3>ATS Score</h3>
+
+<div class="progress" style="height:25px">
+
+{% if score < 50 %}
+
+<div class="progress-bar bg-danger"
+style="width:{{score}}%">
+
+{% elif score < 75 %}
+
+<div class="progress-bar bg-warning"
+style="width:{{score}}%">
+
+{% else %}
+
+<div class="progress-bar bg-success"
+style="width:{{score}}%">
+
+{% endif %}
+
+{{score}}%
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+{% endif %}
+
+
+{% if skills %}
+
+<div class="container mt-4">
+
+<div class="card shadow p-4">
+
+<h4>Detected Skills</h4>
+
+<ul class="list-group">
+
+{% for skill in skills %}
+
+<li class="list-group-item">{{skill}}</li>
+
+{% endfor %}
+
+</ul>
+
+</div>
+
+</div>
+
+{% endif %}
+
+
+{% if matched %}
+
+<div class="container mt-4">
+
+<div class="card shadow p-4">
+
+<h4 class="text-success">Matched Skills</h4>
+
+<ul class="list-group">
+
+{% for skill in matched %}
+
+<li class="list-group-item">✔ {{skill}}</li>
+
+{% endfor %}
+
+</ul>
+
+</div>
+
+</div>
+
+{% endif %}
+
+
+{% if missing %}
+
+<div class="container mt-4">
+
+<div class="card shadow p-4">
+
+<h4 class="text-danger">Missing Skills</h4>
+
+<ul class="list-group">
+
+{% for skill in missing %}
+
+<li class="list-group-item">✘ {{skill}}</li>
+
+{% endfor %}
+
+</ul>
+
+</div>
+
+</div>
+
+{% endif %}
+
+
+{% if sections %}
+
+<div class="container mt-4">
+
+<div class="card shadow p-4">
+
+<h4>Resume Sections</h4>
+
+<ul class="list-group">
+
+{% for k,v in sections.items %}
+
+<li class="list-group-item">
+
+<strong>{{k}}</strong> :
+
+{% if v %}
+<span class="text-success">Present</span>
+{% else %}
+<span class="text-danger">Missing</span>
+{% endif %}
+
+</li>
+
+{% endfor %}
+
+</ul>
+
+</div>
+
+</div>
+
+{% endif %}
+
+
+{% if keywords %}
+
+<div class="container mt-4">
+
+<div class="card shadow p-4">
+
+<h4>Keyword Analysis</h4>
+
+<ul class="list-group">
+
+{% for k,v in keywords.items %}
+
+<li class="list-group-item">{{k}} : {{v}}</li>
+
+{% endfor %}
+
+</ul>
+
+</div>
+
+</div>
+
+{% endif %}
+
+
+{% if suggestions %}
+
+<div class="container mt-4 mb-5">
+
+<div class="card shadow p-4">
+
+<h4>AI Suggestions</h4>
+
+<ul class="list-group">
+
+{% for s in suggestions %}
+
+<li class="list-group-item">{{s}}</li>
+
+{% endfor %}
+
+</ul>
+
+</div>
+
+</div>
+
+{% endif %}
+
+
+<script>
+
+const dropArea = document.getElementById("drop-area");
+const fileInput = document.getElementById("fileInput");
+
+dropArea.addEventListener("dragover",(e)=>{
+e.preventDefault();
+dropArea.style.background="#f1f6ff";
+});
+
+dropArea.addEventListener("dragleave",()=>{
+dropArea.style.background="white";
+});
+
+dropArea.addEventListener("drop",(e)=>{
+e.preventDefault();
+fileInput.files=e.dataTransfer.files;
+dropArea.style.background="white";
+});
+
+</script>
+
+</body>
+</html>
